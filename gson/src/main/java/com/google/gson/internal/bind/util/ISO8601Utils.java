@@ -38,6 +38,9 @@ import java.util.TimeZone;
 @SuppressWarnings("MemberName") // legacy class name
 public class ISO8601Utils {
   private ISO8601Utils() {}
+  private static final int MILLIS_PER_SECOND = 1000;
+  private static final int SECONDS_PER_MINUTE = 60;
+  private static final int MINUTES_PER_HOUR = 60;
 
   /**
    * ID to represent the 'UTC' string, default timezone since Jackson 2.7
@@ -116,8 +119,8 @@ public class ISO8601Utils {
 
     int offset = tz.getOffset(calendar.getTimeInMillis());
     if (offset != 0) {
-      int hours = Math.abs((offset / (60 * 1000)) / 60);
-      int minutes = Math.abs((offset / (60 * 1000)) % 60);
+      int hours = Math.abs((offset / (SECONDS_PER_MINUTE * MILLIS_PER_SECOND)) / MINUTES_PER_HOUR);
+      int minutes = Math.abs((offset / (SECONDS_PER_MINUTE * MILLIS_PER_SECOND)) % MINUTES_PER_HOUR);
       formatted.append(offset < 0 ? '-' : '+');
       padInt(formatted, hours, "hh".length());
       formatted.append(':');
