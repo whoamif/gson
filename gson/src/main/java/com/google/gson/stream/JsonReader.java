@@ -209,6 +209,8 @@ import java.util.Objects;
  * @since 1.6
  */
 public class JsonReader implements Closeable {
+  static final int DEFAULT_NESTING_LIMIT = 255;
+  static final int BUFFER_SIZE = 1024;
   private static final long MIN_INCOMPLETE_INTEGER = Long.MIN_VALUE / 10;
 
   private static final int PEEKED_NONE = 0;
@@ -252,10 +254,9 @@ public class JsonReader implements Closeable {
   private Strictness strictness = Strictness.LEGACY_STRICT;
   // Default nesting limit is based on
   // https://github.com/square/moshi/blob/parent-1.15.0/moshi/src/main/java/com/squareup/moshi/JsonReader.java#L228-L230
-  static final int DEFAULT_NESTING_LIMIT = 255;
+
   private int nestingLimit = DEFAULT_NESTING_LIMIT;
 
-  static final int BUFFER_SIZE = 1024;
 
   /**
    * Use a manual buffer to easily read and unread upcoming characters, and also so we can create
