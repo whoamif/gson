@@ -291,8 +291,7 @@
               private String peekedString;
 
               /** The nesting stack. Using a manual array rather than an ArrayList saves 20%. */
-              private int[] stack = new int[32];
-              char[] buffer = new char[2048];
+
 
               private int stackSize = 0;
 
