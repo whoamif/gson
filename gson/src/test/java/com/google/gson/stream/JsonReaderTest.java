@@ -2136,6 +2136,29 @@ public final class JsonReaderTest {
     JsonToken token = reader.peek();
     assertThat(token).isEqualTo(JsonToken.NUMBER);
   }
+  @Test
+  public void testNextIntOverflow() throws IOException {
+    // 2147483648 est MAX_INT + 1 → doit lever une exception
+    JsonReader reader = new JsonReader(
+            new StringReader("2147483648"));
+    try {
+      reader.nextInt();
+      fail("Expected NumberFormatException");
+    } catch (NumberFormatException e) {
+      // comportement attendu ✓
+    } finally {
+      reader.close();
+    }
+  }
+
+  @Test
+  public void testReadEmptyJsonObject() throws IOException {
+    JsonReader reader = new JsonReader(new StringReader("{}"));
+    reader.beginObject();
+    assertFalse(reader.hasNext()); // aucun champ
+    reader.endObject();
+    reader.close();
+  }
 
   private static void assertStrictError(MalformedJsonException exception, String expectedLocation) {
     assertThat(exception)
