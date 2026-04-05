@@ -39,7 +39,7 @@ import java.util.List;
  * @author Inderjeet Singh
  * @author Joel Leitch
  */
-public final class JsonArray extends JsonElement implements Iterable<JsonElement> {
+public final class JsonArray extends JsonContainer implements Iterable<JsonElement> {
   private final ArrayList<JsonElement> elements;
 
   /** Creates an empty JsonArray. */
@@ -199,15 +199,6 @@ public final class JsonArray extends JsonElement implements Iterable<JsonElement
     return elements.size();
   }
 
-  /**
-   * Returns true if the array is empty.
-   *
-   * @return true if the array is empty.
-   * @since 2.8.7
-   */
-  public boolean isEmpty() {
-    return elements.isEmpty();
-  }
 
   /**
    * Returns an iterator to navigate the elements of the array. Since the array is an ordered list,

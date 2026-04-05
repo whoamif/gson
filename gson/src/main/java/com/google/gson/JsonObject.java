@@ -37,7 +37,7 @@ import java.util.Set;
  * @author Inderjeet Singh
  * @author Joel Leitch
  */
-public final class JsonObject extends JsonElement {
+public final class JsonObject extends JsonContainer {
   private final LinkedTreeMap<String, JsonElement> members = new LinkedTreeMap<>(false);
 
   /** Creates an empty JsonObject. */
@@ -157,15 +157,6 @@ public final class JsonObject extends JsonElement {
     return members.size();
   }
 
-  /**
-   * Returns true if the number of key/value pairs in the object is zero.
-   *
-   * @return true if the number of key/value pairs in the object is zero.
-   * @since 2.10.1
-   */
-  public boolean isEmpty() {
-    return members.isEmpty();
-  }
 
   /**
    * Convenience method to check if a member with the specified name is present in this object.
