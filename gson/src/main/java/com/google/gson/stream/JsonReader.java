@@ -172,12 +172,11 @@
              *       username = reader.nextString();
              *     } else if (name.equals("followers_count")) {
              *       followersCount = reader.nextInt();
-             *
              *       *     } else {
              *       reader.skipValue();
              *     }
              *   }
-                     *   reader.endObject();
+             *   reader.endObject();
              *   return new User(username, followersCount);
              * }
              * }</pre>
@@ -210,8 +209,6 @@
              * @since 1.6
              */
             public class JsonReader implements Closeable {
-              private static final int BUFFER_SIZE = 2048;
-              private static final int INITIAL_STACK_SIZE = 32;
               static final int DEFAULT_NESTING_LIMIT = 255;
               static final int BUFFER_SIZE = 1024;
               private static final long MIN_INCOMPLETE_INTEGER = Long.MIN_VALUE / 10;
@@ -266,7 +263,6 @@
                * strings without an intermediate StringBuilder. We decode literals directly out of this buffer,
                * so it must be at least as long as the longest token that can be reported as a number.
                */
-              private final char[] buffer = new char[BUFFER_SIZE];
 
               private int pos = 0;
               private int limit = 0;
@@ -295,7 +291,9 @@
               private String peekedString;
 
               /** The nesting stack. Using a manual array rather than an ArrayList saves 20%. */
-              int[] stack = new int[INITIAL_STACK_SIZE];
+              private int[] stack = new int[32];
+              char[] buffer = new char[2048];
+
               private int stackSize = 0;
 
               {
