@@ -448,66 +448,92 @@ public final class TypeAdapters {
                 }
             };
 
-    private static class FloatAdapter extends TypeAdapter<Number> {
-        private final boolean strict;
+    /**
+     * Base class for {@link FloatAdapter} and {@link DoubleAdapter}.
+     *
+     * <p>Both adapters share the same structure: a {@code strict} flag, a {@code read()} method
+     * that handles JSON null and delegates numeric parsing to {@link #readNumber(JsonReader)}, and
+     * a {@code write()} method that handles Java null, validates the value when strict mode is on,
+     * and delegates the actual writing to {@link #writeNumber(JsonWriter, Number)}.
+     *
+     * <p>Subclasses only need to implement the two primitive-specific operations.
+     */
+    private abstract static class AbstractFloatingPointAdapter extends TypeAdapter<Number> {
+        final boolean strict;
 
-        FloatAdapter(boolean strict) {
+        AbstractFloatingPointAdapter(boolean strict) {
             this.strict = strict;
         }
 
+        /**
+         * Reads the next numeric value from {@code in} and returns it as the appropriate
+         * {@link Number} subtype ({@link Float} or {@link Double}).
+         */
+        abstract Number readNumber(JsonReader in) throws IOException;
+
+        /**
+         * Validates {@code value} and writes it to {@code out}.
+         * The null-check and strict validation are already done by the base {@link #write} method;
+         * implementors receive a non-null value that has already passed the finite check.
+         */
+        abstract void writeNumber(JsonWriter out, Number value) throws IOException;
+
         @Override
-        public Float read(JsonReader in) throws IOException {
+        public final Number read(JsonReader in) throws IOException {
             if (in.peek() == JsonToken.NULL) {
                 in.nextNull();
                 return null;
             }
+            return readNumber(in);
+        }
+
+        @Override
+        public final void write(JsonWriter out, Number value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+                return;
+            }
+            if (strict) {
+                checkValidFloatingPoint(value.doubleValue());
+            }
+            writeNumber(out, value);
+        }
+    }
+
+    private static class FloatAdapter extends AbstractFloatingPointAdapter {
+
+        FloatAdapter(boolean strict) {
+            super(strict);
+        }
+
+        @Override
+        Number readNumber(JsonReader in) throws IOException {
             return (float) in.nextDouble();
         }
 
         @Override
-        public void write(JsonWriter out, Number value) throws IOException {
-            if (value == null) {
-                out.nullValue();
-                return;
-            }
-            float floatValue = value.floatValue();
-            if (strict) {
-                checkValidFloatingPoint(floatValue);
-            }
-            // For backward compatibility don't call `JsonWriter.value(float)` because that method has
-            // been newly added and not all custom JsonWriter implementations might override it yet
-            Number floatNumber = value instanceof Float ? value : floatValue;
+        void writeNumber(JsonWriter out, Number value) throws IOException {
+            // For backward compatibility don't call `JsonWriter.value(float)` because that method
+            // has been newly added and not all custom JsonWriter implementations might override it yet
+            Number floatNumber = value instanceof Float ? value : value.floatValue();
             out.value(floatNumber);
         }
     }
 
-    private static class DoubleAdapter extends TypeAdapter<Number> {
-        private final boolean strict;
+    private static class DoubleAdapter extends AbstractFloatingPointAdapter {
 
         DoubleAdapter(boolean strict) {
-            this.strict = strict;
+            super(strict);
         }
 
         @Override
-        public Double read(JsonReader in) throws IOException {
-            if (in.peek() == JsonToken.NULL) {
-                in.nextNull();
-                return null;
-            }
+        Number readNumber(JsonReader in) throws IOException {
             return in.nextDouble();
         }
 
         @Override
-        public void write(JsonWriter out, Number value) throws IOException {
-            if (value == null) {
-                out.nullValue();
-                return;
-            }
-            double doubleValue = value.doubleValue();
-            if (strict) {
-                checkValidFloatingPoint(doubleValue);
-            }
-            out.value(doubleValue);
+        void writeNumber(JsonWriter out, Number value) throws IOException {
+            out.value(value.doubleValue());
         }
     }
 
