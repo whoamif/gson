@@ -134,7 +134,15 @@ import java.util.concurrent.ConcurrentMap;
  */
 public final class Gson {
 
-  private static final String JSON_NON_EXECUTABLE_PREFIX = ")]}'\n";
+  // -------------------------------------------------------------------------
+  // 1. Constantes
+  // -------------------------------------------------------------------------
+
+  private static final String JSON_NON_EXECUTABLE_PREFIX = ")]}\'\n";
+
+  // -------------------------------------------------------------------------
+  // 2. Attributs d'instance
+  // -------------------------------------------------------------------------
 
   /**
    * This thread local guards against reentrant calls to {@link #getAdapter(TypeToken)}. In certain
@@ -149,10 +157,10 @@ public final class Gson {
    */
   @SuppressWarnings("ThreadLocalUsage")
   private final ThreadLocal<Map<TypeToken<?>, TypeAdapter<?>>> threadLocalAdapterResults =
-      new ThreadLocal<>();
+          new ThreadLocal<>();
 
   private final ConcurrentMap<TypeToken<?>, TypeAdapter<?>> typeTokenCache =
-      new ConcurrentHashMap<>();
+          new ConcurrentHashMap<>();
 
   private final ConstructorConstructor constructorConstructor;
   private final JsonAdapterAnnotationTypeAdapterFactory jsonAdapterFactory;
@@ -179,6 +187,10 @@ public final class Gson {
   final ToNumberStrategy objectToNumberStrategy;
   final ToNumberStrategy numberToNumberStrategy;
   final List<ReflectionAccessFilter> reflectionFilters;
+
+  // -------------------------------------------------------------------------
+  // 3. Constructeurs
+  // -------------------------------------------------------------------------
 
   /**
    * Constructs a Gson object with default configuration. The default configuration has the
@@ -250,11 +262,15 @@ public final class Gson {
       this.factories = GsonBuilder.DEFAULT_TYPE_ADAPTER_FACTORIES;
     } else {
       this.constructorConstructor =
-          new ConstructorConstructor(instanceCreators, useJdkUnsafe, reflectionFilters);
+              new ConstructorConstructor(instanceCreators, useJdkUnsafe, reflectionFilters);
       this.jsonAdapterFactory = new JsonAdapterAnnotationTypeAdapterFactory(constructorConstructor);
       this.factories = builder.createFactories(constructorConstructor, jsonAdapterFactory);
     }
   }
+
+  // -------------------------------------------------------------------------
+  // 4. Méthodes publiques
+  // -------------------------------------------------------------------------
 
   /**
    * Returns a new GsonBuilder containing all custom factories and configuration used by the current
@@ -362,7 +378,7 @@ public final class Gson {
 
     if (candidate == null) {
       throw new IllegalArgumentException(
-          "GSON (" + GsonBuildConfig.VERSION + ") cannot handle " + type);
+              "GSON (" + GsonBuildConfig.VERSION + ") cannot handle " + type);
     }
 
     if (isInitialAdapterRequest) {
@@ -667,7 +683,7 @@ public final class Gson {
       throw new JsonIOException(e);
     } catch (AssertionError e) {
       throw new AssertionError(
-          "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+              "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
     } finally {
       writer.setStrictness(oldStrictness);
       writer.setHtmlSafe(oldHtmlSafe);
@@ -746,7 +762,7 @@ public final class Gson {
       throw new JsonIOException(e);
     } catch (AssertionError e) {
       throw new AssertionError(
-          "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+              "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
     } finally {
       writer.setStrictness(oldStrictness);
       writer.setHtmlSafe(oldHtmlSafe);
@@ -915,7 +931,7 @@ public final class Gson {
    * @see #fromJson(Reader, TypeToken)
    */
   public <T> T fromJson(Reader json, Class<T> classOfT)
-      throws JsonSyntaxException, JsonIOException {
+          throws JsonSyntaxException, JsonIOException {
     return fromJson(json, TypeToken.get(classOfT));
   }
 
@@ -976,7 +992,7 @@ public final class Gson {
    * @since 2.10
    */
   public <T> T fromJson(Reader json, TypeToken<T> typeOfT)
-      throws JsonIOException, JsonSyntaxException {
+          throws JsonIOException, JsonSyntaxException {
     JsonReader jsonReader = newJsonReader(json);
     T object = fromJson(jsonReader, typeOfT);
     assertFullConsumption(object, jsonReader);
@@ -1021,7 +1037,7 @@ public final class Gson {
    */
   @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
   public <T> T fromJson(JsonReader reader, Type typeOfT)
-      throws JsonIOException, JsonSyntaxException {
+          throws JsonIOException, JsonSyntaxException {
     return (T) fromJson(reader, TypeToken.get(typeOfT));
   }
 
@@ -1062,7 +1078,7 @@ public final class Gson {
    * @since 2.10
    */
   public <T> T fromJson(JsonReader reader, TypeToken<T> typeOfT)
-      throws JsonIOException, JsonSyntaxException {
+          throws JsonIOException, JsonSyntaxException {
     boolean isEmpty = true;
     Strictness oldStrictness = reader.getStrictness();
 
@@ -1081,13 +1097,13 @@ public final class Gson {
       Class<?> expectedTypeWrapped = Primitives.wrap(typeOfT.getRawType());
       if (object != null && !expectedTypeWrapped.isInstance(object)) {
         throw new ClassCastException(
-            "Type adapter '"
-                + typeAdapter
-                + "' returned wrong type; requested "
-                + typeOfT.getRawType()
-                + " but got instance of "
-                + object.getClass()
-                + "\nVerify that the adapter was registered for the correct type.");
+                "Type adapter '"
+                        + typeAdapter
+                        + "' returned wrong type; requested "
+                        + typeOfT.getRawType()
+                        + " but got instance of "
+                        + object.getClass()
+                        + "\nVerify that the adapter was registered for the correct type.");
       }
       return object;
     } catch (EOFException e) {
@@ -1106,7 +1122,7 @@ public final class Gson {
       throw new JsonSyntaxException(e);
     } catch (AssertionError e) {
       throw new AssertionError(
-          "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
+              "AssertionError (GSON " + GsonBuildConfig.VERSION + "): " + e.getMessage(), e);
     } finally {
       reader.setStrictness(oldStrictness);
     }
@@ -1193,6 +1209,21 @@ public final class Gson {
     return fromJson(new JsonTreeReader(json), typeOfT);
   }
 
+  @Override
+  public String toString() {
+    return "{serializeNulls:"
+            + serializeNulls
+            + ",factories:"
+            + factories
+            + ",instanceCreators:"
+            + constructorConstructor
+            + "}";
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. Méthodes privées / package-private
+  // -------------------------------------------------------------------------
+
   private static void assertFullConsumption(Object obj, JsonReader reader) {
     try {
       if (obj != null && reader.peek() != JsonToken.END_DOCUMENT) {
@@ -1230,8 +1261,8 @@ public final class Gson {
         // (de-)serialization
         // directly within the TypeAdapterFactory which requested it
         throw new IllegalStateException(
-            "Adapter for type with cyclic dependency has been used"
-                + " before dependency has been resolved");
+                "Adapter for type with cyclic dependency has been used"
+                        + " before dependency has been resolved");
       }
       return delegate;
     }
@@ -1250,16 +1281,5 @@ public final class Gson {
     public void write(JsonWriter out, T value) throws IOException {
       delegate().write(out, value);
     }
-  }
-
-  @Override
-  public String toString() {
-    return "{serializeNulls:"
-        + serializeNulls
-        + ",factories:"
-        + factories
-        + ",instanceCreators:"
-        + constructorConstructor
-        + "}";
   }
 }
