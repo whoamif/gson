@@ -578,102 +578,173 @@
                 }
               }
 
+              // ─────────────────────────────────────────────────────────────
+// MÉTHODE PRINCIPALE — orchestre, ne contient plus de logique
+// ─────────────────────────────────────────────────────────────
+
               @SuppressWarnings("fallthrough")
               int doPeek() throws IOException {
                 int peekStack = stack[stackSize - 1];
+
                 if (peekStack == JsonScope.EMPTY_ARRAY) {
                   stack[stackSize - 1] = JsonScope.NONEMPTY_ARRAY;
+
                 } else if (peekStack == JsonScope.NONEMPTY_ARRAY) {
-                  // Look for a comma before the next element.
+                  int result = peekInNonemptyArray();
+                  if (result != PEEKED_NONE) return result;
+
+                } else if (peekStack == JsonScope.EMPTY_OBJECT || peekStack == JsonScope.NONEMPTY_OBJECT) {
+                  return peekObjectName(peekStack);
+
+                } else if (peekStack == JsonScope.DANGLING_NAME) {
+                  peekAfterDanglingName();
+
+                } else if (peekStack == JsonScope.EMPTY_DOCUMENT) {
+                  peekEmptyDocument();
+
+                } else if (peekStack == JsonScope.NONEMPTY_DOCUMENT) {
+                  int result = peekNonemptyDocument();
+                  if (result != PEEKED_NONE) return result;
+
+                } else if (peekStack == JsonScope.CLOSED) {
+                  throw new IllegalStateException("JsonReader is closed");
+                }
+
+                return peekValue(peekStack);
+              }
+
+// ─────────────────────────────────────────────────────────────
+// MÉTHODES PRIVÉES — une par scope / responsabilité
+// ─────────────────────────────────────────────────────────────
+
+              /**
+               * Consomme le séparateur (virgule ou point-virgule) attendu entre deux
+               * éléments d'un tableau non vide. Retourne PEEKED_END_ARRAY si ']' est
+               * rencontré, PEEKED_NONE sinon (la lecture de valeur continue).
+               */
+              private int peekInNonemptyArray() throws IOException {
+                int c = nextNonWhitespace(true);
+                switch (c) {
+                  case ']':
+                    peeked = PEEKED_END_ARRAY;
+                    return peeked;
+                  case ';':
+                    checkLenient(); // fall-through
+                  case ',':
+                    return PEEKED_NONE;
+                  default:
+                    throw syntaxError("Unterminated array");
+                }
+              }
+
+              /**
+               * Lit le nom de la prochaine propriété d'un objet (vide ou non vide).
+               * Pour un objet non vide, consomme d'abord le séparateur (virgule).
+               * Retourne le token correspondant au type de nom détecté.
+               */
+              private int peekObjectName(int peekStack) throws IOException {
+                stack[stackSize - 1] = JsonScope.DANGLING_NAME;
+
+                // Objet non vide : on cherche la virgule séparatrice avant le prochain nom
+                if (peekStack == JsonScope.NONEMPTY_OBJECT) {
                   int c = nextNonWhitespace(true);
                   switch (c) {
-                    case ']':
-                      peeked = PEEKED_END_ARRAY;
+                    case '}':
+                      peeked = PEEKED_END_OBJECT;
                       return peeked;
                     case ';':
                       checkLenient(); // fall-through
                     case ',':
                       break;
                     default:
-                      throw syntaxError("Unterminated array");
+                      throw syntaxError("Unterminated object");
                   }
-                } else if (peekStack == JsonScope.EMPTY_OBJECT || peekStack == JsonScope.NONEMPTY_OBJECT) {
-                  stack[stackSize - 1] = JsonScope.DANGLING_NAME;
-                  // Look for a comma before the next element.
-                  if (peekStack == JsonScope.NONEMPTY_OBJECT) {
-                    int c = nextNonWhitespace(true);
-                    switch (c) {
-                      case '}':
-                        peeked = PEEKED_END_OBJECT;
-                        return peeked;
-                      case ';':
-                        checkLenient(); // fall-through
-                      case ',':
-                        break;
-                      default:
-                        throw syntaxError("Unterminated object");
-                    }
-                  }
-                  int c = nextNonWhitespace(true);
-                  switch (c) {
-                    case '"':
-                      peeked = PEEKED_DOUBLE_QUOTED_NAME;
-                      return peeked;
-                    case '\'':
-                      checkLenient();
-                      peeked = PEEKED_SINGLE_QUOTED_NAME;
-                      return peeked;
-                    case '}':
-                      if (peekStack != JsonScope.NONEMPTY_OBJECT) {
-                        peeked = PEEKED_END_OBJECT;
-                        return peeked;
-                      } else {
-                        throw syntaxError("Expected name");
-                      }
-                    default:
-                      checkLenient();
-                      pos--; // Don't consume the first character in an unquoted string.
-                      if (isLiteral((char) c)) {
-                        peeked = PEEKED_UNQUOTED_NAME;
-                        return peeked;
-                      } else {
-                        throw syntaxError("Expected name");
-                      }
-                  }
-                } else if (peekStack == JsonScope.DANGLING_NAME) {
-                  stack[stackSize - 1] = JsonScope.NONEMPTY_OBJECT;
-                  // Look for a colon before the value.
-                  int c = nextNonWhitespace(true);
-                  switch (c) {
-                    case ':':
-                      break;
-                    case '=':
-                      checkLenient();
-                      if ((pos < limit || fillBuffer(1)) && buffer[pos] == '>') {
-                        pos++;
-                      }
-                      break;
-                    default:
-                      throw syntaxError("Expected ':'");
-                  }
-                } else if (peekStack == JsonScope.EMPTY_DOCUMENT) {
-                  if (strictness == Strictness.LENIENT) {
-                    consumeNonExecutePrefix();
-                  }
-                  stack[stackSize - 1] = JsonScope.NONEMPTY_DOCUMENT;
-                } else if (peekStack == JsonScope.NONEMPTY_DOCUMENT) {
-                  int c = nextNonWhitespace(false);
-                  if (c == -1) {
-                    peeked = PEEKED_EOF;
-                    return peeked;
-                  } else {
-                    checkLenient();
-                    pos--;
-                  }
-                } else if (peekStack == JsonScope.CLOSED) {
-                  throw new IllegalStateException("JsonReader is closed");
                 }
 
+                // Lecture du nom lui-même
+                int c = nextNonWhitespace(true);
+                switch (c) {
+                  case '"':
+                    peeked = PEEKED_DOUBLE_QUOTED_NAME;
+                    return peeked;
+                  case '\'':
+                    checkLenient();
+                    peeked = PEEKED_SINGLE_QUOTED_NAME;
+                    return peeked;
+                  case '}':
+                    if (peekStack != JsonScope.NONEMPTY_OBJECT) {
+                      peeked = PEEKED_END_OBJECT;
+                      return peeked;
+                    } else {
+                      throw syntaxError("Expected name");
+                    }
+                  default:
+                    checkLenient();
+                    pos--; // ne pas consommer le premier caractère du nom non quoté
+                    if (isLiteral((char) c)) {
+                      peeked = PEEKED_UNQUOTED_NAME;
+                      return peeked;
+                    } else {
+                      throw syntaxError("Expected name");
+                    }
+                }
+              }
+
+              /**
+               * Consomme le séparateur ':' (ou '=>' en mode lenient) qui suit un nom
+               * de propriété avant sa valeur.
+               */
+              private void peekAfterDanglingName() throws IOException {
+                stack[stackSize - 1] = JsonScope.NONEMPTY_OBJECT;
+                int c = nextNonWhitespace(true);
+                switch (c) {
+                  case ':':
+                    break;
+                  case '=':
+                    checkLenient();
+                    if ((pos < limit || fillBuffer(1)) && buffer[pos] == '>') {
+                      pos++;
+                    }
+                    break;
+                  default:
+                    throw syntaxError("Expected ':'");
+                }
+              }
+
+              /**
+               * Initialise la lecture d'un document vide : consomme le préfixe
+               * non-exécutable si le mode lenient est actif.
+               */
+              private void peekEmptyDocument() throws IOException {
+                if (strictness == Strictness.LENIENT) {
+                  consumeNonExecutePrefix();
+                }
+                stack[stackSize - 1] = JsonScope.NONEMPTY_DOCUMENT;
+              }
+
+              /**
+               * Gère la fin d'un document non vide. Retourne PEEKED_EOF si le flux
+               * est épuisé, PEEKED_NONE si d'autres valeurs suivent (mode lenient).
+               */
+              private int peekNonemptyDocument() throws IOException {
+                int c = nextNonWhitespace(false);
+                if (c == -1) {
+                  peeked = PEEKED_EOF;
+                  return peeked;
+                } else {
+                  checkLenient();
+                  pos--;
+                  return PEEKED_NONE;
+                }
+              }
+
+              /**
+               * Lit le prochain caractère significatif et détermine le token de valeur
+               * (string, tableau, objet, null implicite, keyword, nombre, unquoted).
+               * C'est la phase finale de doPeek(), atteinte après la gestion du scope.
+               */
+              @SuppressWarnings("fallthrough")
+              private int peekValue(int peekStack) throws IOException {
                 int c = nextNonWhitespace(true);
                 switch (c) {
                   case ']':
@@ -681,6 +752,49 @@
                       peeked = PEEKED_END_ARRAY;
                       return peeked;
                     }
+                    // fall-through to handle ",]"
+                  case ';':
+                  case ',':
+                    // En mode lenient, un littéral de longueur 0 dans un tableau vaut null
+                    if (peekStack == JsonScope.EMPTY_ARRAY || peekStack == JsonScope.NONEMPTY_ARRAY) {
+                      checkLenient();
+                      pos--;
+                      peeked = PEEKED_NULL;
+                      return peeked;
+                    } else {
+                      throw syntaxError("Unexpected value");
+                    }
+                  case '\'':
+                    checkLenient();
+                    peeked = PEEKED_SINGLE_QUOTED;
+                    return peeked;
+                  case '"':
+                    peeked = PEEKED_DOUBLE_QUOTED;
+                    return peeked;
+                  case '[':
+                    peeked = PEEKED_BEGIN_ARRAY;
+                    return peeked;
+                  case '{':
+                    peeked = PEEKED_BEGIN_OBJECT;
+                    return peeked;
+                  default:
+                    pos--; // ne pas consommer le premier caractère d'un littéral
+                }
+
+                int result = peekKeyword();
+                if (result != PEEKED_NONE) return result;
+
+                result = peekNumber();
+                if (result != PEEKED_NONE) return result;
+
+                if (!isLiteral(buffer[pos])) {
+                  throw syntaxError("Expected value");
+                }
+
+                checkLenient();
+                peeked = PEEKED_UNQUOTED;
+                return peeked;
+              }
                   // fall-through to handle ",]"
                   case ';':
                   case ',':
