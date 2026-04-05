@@ -58,13 +58,12 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * Type adapters for basic types. More complex adapters exist as separate classes in the enclosing
  * package.
  */
-public final class TypeAdapters {
-    private TypeAdapters() {
-        throw new UnsupportedOperationException();
-    }
+public class TypeAdapters {
+    /** Creates a new TypeAdapters instance. */
+    public TypeAdapters() {}
 
     @SuppressWarnings("rawtypes")
-    public static final TypeAdapter<Class> CLASS =
+    public final TypeAdapter<Class> CLASS =
             new TypeAdapter<Class>() {
                 @Override
                 public void write(JsonWriter out, Class value) throws IOException {
@@ -85,9 +84,9 @@ public final class TypeAdapters {
                 }
             }.nullSafe();
 
-    public static final TypeAdapterFactory CLASS_FACTORY = newFactory(Class.class, CLASS);
+    public final TypeAdapterFactory CLASS_FACTORY = newFactory(Class.class, CLASS);
 
-    public static final TypeAdapter<BitSet> BIT_SET =
+    public final TypeAdapter<BitSet> BIT_SET =
             new TypeAdapter<BitSet>() {
                 @Override
                 public BitSet read(JsonReader in) throws IOException {
@@ -141,9 +140,9 @@ public final class TypeAdapters {
                 }
             }.nullSafe();
 
-    public static final TypeAdapterFactory BIT_SET_FACTORY = newFactory(BitSet.class, BIT_SET);
+    public final TypeAdapterFactory BIT_SET_FACTORY = newFactory(BitSet.class, BIT_SET);
 
-    public static final TypeAdapter<Boolean> BOOLEAN =
+    public final TypeAdapter<Boolean> BOOLEAN =
             new TypeAdapter<Boolean>() {
                 @Override
                 public Boolean read(JsonReader in) throws IOException {
@@ -167,7 +166,7 @@ public final class TypeAdapters {
     /**
      * Writes a boolean as a string. Useful for map keys, where booleans aren't otherwise permitted.
      */
-    public static final TypeAdapter<Boolean> BOOLEAN_AS_STRING =
+    public final TypeAdapter<Boolean> BOOLEAN_AS_STRING =
             new TypeAdapter<Boolean>() {
                 @Override
                 public Boolean read(JsonReader in) throws IOException {
@@ -184,10 +183,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory BOOLEAN_FACTORY =
+    public final TypeAdapterFactory BOOLEAN_FACTORY =
             newFactory(boolean.class, Boolean.class, BOOLEAN);
 
-    public static final TypeAdapter<Number> BYTE =
+    public final TypeAdapter<Number> BYTE =
             new TypeAdapter<Number>() {
                 @Override
                 public Number read(JsonReader in) throws IOException {
@@ -220,9 +219,9 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory BYTE_FACTORY = newFactory(byte.class, Byte.class, BYTE);
+    public final TypeAdapterFactory BYTE_FACTORY = newFactory(byte.class, Byte.class, BYTE);
 
-    public static final TypeAdapter<Number> SHORT =
+    public final TypeAdapter<Number> SHORT =
             new TypeAdapter<Number>() {
                 @Override
                 public Number read(JsonReader in) throws IOException {
@@ -255,10 +254,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory SHORT_FACTORY =
+    public final TypeAdapterFactory SHORT_FACTORY =
             newFactory(short.class, Short.class, SHORT);
 
-    public static final TypeAdapter<Number> INTEGER =
+    public final TypeAdapter<Number> INTEGER =
             new TypeAdapter<Number>() {
                 @Override
                 public Number read(JsonReader in) throws IOException {
@@ -282,10 +281,10 @@ public final class TypeAdapters {
                     }
                 }
             };
-    public static final TypeAdapterFactory INTEGER_FACTORY =
+    public final TypeAdapterFactory INTEGER_FACTORY =
             newFactory(int.class, Integer.class, INTEGER);
 
-    public static final TypeAdapter<AtomicInteger> ATOMIC_INTEGER =
+    public final TypeAdapter<AtomicInteger> ATOMIC_INTEGER =
             new TypeAdapter<AtomicInteger>() {
                 @Override
                 public AtomicInteger read(JsonReader in) throws IOException {
@@ -301,7 +300,7 @@ public final class TypeAdapters {
                     out.value(value.get());
                 }
             }.nullSafe();
-    public static final TypeAdapterFactory ATOMIC_INTEGER_FACTORY =
+    public final TypeAdapterFactory ATOMIC_INTEGER_FACTORY =
             newFactory(AtomicInteger.class, TypeAdapters.ATOMIC_INTEGER);
 
     public static TypeAdapter<AtomicLong> atomicLongAdapter(TypeAdapter<Number> longAdapter) {
@@ -320,7 +319,7 @@ public final class TypeAdapters {
         }.nullSafe();
     }
 
-    public static final TypeAdapter<AtomicBoolean> ATOMIC_BOOLEAN =
+    public final TypeAdapter<AtomicBoolean> ATOMIC_BOOLEAN =
             new TypeAdapter<AtomicBoolean>() {
                 @Override
                 public AtomicBoolean read(JsonReader in) throws IOException {
@@ -332,10 +331,10 @@ public final class TypeAdapters {
                     out.value(value.get());
                 }
             }.nullSafe();
-    public static final TypeAdapterFactory ATOMIC_BOOLEAN_FACTORY =
+    public final TypeAdapterFactory ATOMIC_BOOLEAN_FACTORY =
             newFactory(AtomicBoolean.class, TypeAdapters.ATOMIC_BOOLEAN);
 
-    public static final TypeAdapter<AtomicIntegerArray> ATOMIC_INTEGER_ARRAY =
+    public final TypeAdapter<AtomicIntegerArray> ATOMIC_INTEGER_ARRAY =
             new TypeAdapter<AtomicIntegerArray>() {
                 @Override
                 public AtomicIntegerArray read(JsonReader in) throws IOException {
@@ -367,7 +366,7 @@ public final class TypeAdapters {
                     out.endArray();
                 }
             }.nullSafe();
-    public static final TypeAdapterFactory ATOMIC_INTEGER_ARRAY_FACTORY =
+    public final TypeAdapterFactory ATOMIC_INTEGER_ARRAY_FACTORY =
             newFactory(AtomicIntegerArray.class, TypeAdapters.ATOMIC_INTEGER_ARRAY);
 
     public static TypeAdapter<AtomicLongArray> atomicLongArrayAdapter(
@@ -402,7 +401,7 @@ public final class TypeAdapters {
         }.nullSafe();
     }
 
-    public static final TypeAdapter<Number> LONG =
+    public final TypeAdapter<Number> LONG =
             new TypeAdapter<Number>() {
                 @Override
                 public Number read(JsonReader in) throws IOException {
@@ -427,7 +426,7 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapter<Number> LONG_AS_STRING =
+    public final TypeAdapter<Number> LONG_AS_STRING =
             new TypeAdapter<Number>() {
                 @Override
                 public Number read(JsonReader in) throws IOException {
@@ -546,13 +545,13 @@ public final class TypeAdapters {
         }
     }
 
-    public static final TypeAdapter<Number> FLOAT = new FloatAdapter(false);
-    public static final TypeAdapter<Number> FLOAT_STRICT = new FloatAdapter(true);
+    public final TypeAdapter<Number> FLOAT = new FloatAdapter(false);
+    public final TypeAdapter<Number> FLOAT_STRICT = new FloatAdapter(true);
 
-    public static final TypeAdapter<Number> DOUBLE = new DoubleAdapter(false);
-    public static final TypeAdapter<Number> DOUBLE_STRICT = new DoubleAdapter(true);
+    public final TypeAdapter<Number> DOUBLE = new DoubleAdapter(false);
+    public final TypeAdapter<Number> DOUBLE_STRICT = new DoubleAdapter(true);
 
-    public static final TypeAdapter<Character> CHARACTER =
+    public final TypeAdapter<Character> CHARACTER =
             new TypeAdapter<Character>() {
                 @Override
                 public Character read(JsonReader in) throws IOException {
@@ -574,10 +573,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory CHARACTER_FACTORY =
+    public final TypeAdapterFactory CHARACTER_FACTORY =
             newFactory(char.class, Character.class, CHARACTER);
 
-    public static final TypeAdapter<String> STRING =
+    public final TypeAdapter<String> STRING =
             new TypeAdapter<String>() {
                 @Override
                 public String read(JsonReader in) throws IOException {
@@ -599,7 +598,7 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapter<BigDecimal> BIG_DECIMAL =
+    public final TypeAdapter<BigDecimal> BIG_DECIMAL =
             new TypeAdapter<BigDecimal>() {
                 @Override
                 public BigDecimal read(JsonReader in) throws IOException {
@@ -622,10 +621,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory BIG_DECIMAL_FACTORY =
+    public final TypeAdapterFactory BIG_DECIMAL_FACTORY =
             newFactory(BigDecimal.class, BIG_DECIMAL);
 
-    public static final TypeAdapter<BigInteger> BIG_INTEGER =
+    public final TypeAdapter<BigInteger> BIG_INTEGER =
             new TypeAdapter<BigInteger>() {
                 @Override
                 public BigInteger read(JsonReader in) throws IOException {
@@ -648,10 +647,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory BIG_INTEGER_FACTORY =
+    public final TypeAdapterFactory BIG_INTEGER_FACTORY =
             newFactory(BigInteger.class, BIG_INTEGER);
 
-    public static final TypeAdapter<LazilyParsedNumber> LAZILY_PARSED_NUMBER =
+    public final TypeAdapter<LazilyParsedNumber> LAZILY_PARSED_NUMBER =
             new TypeAdapter<LazilyParsedNumber>() {
                 // Normally users should not be able to access and deserialize LazilyParsedNumber because
                 // it is an internal type, but implement this nonetheless in case there are legit corner
@@ -671,12 +670,12 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory LAZILY_PARSED_NUMBER_FACTORY =
+    public final TypeAdapterFactory LAZILY_PARSED_NUMBER_FACTORY =
             newFactory(LazilyParsedNumber.class, LAZILY_PARSED_NUMBER);
 
-    public static final TypeAdapterFactory STRING_FACTORY = newFactory(String.class, STRING);
+    public final TypeAdapterFactory STRING_FACTORY = newFactory(String.class, STRING);
 
-    public static final TypeAdapter<StringBuilder> STRING_BUILDER =
+    public final TypeAdapter<StringBuilder> STRING_BUILDER =
             new TypeAdapter<StringBuilder>() {
                 @Override
                 public StringBuilder read(JsonReader in) throws IOException {
@@ -693,10 +692,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory STRING_BUILDER_FACTORY =
+    public final TypeAdapterFactory STRING_BUILDER_FACTORY =
             newFactory(StringBuilder.class, STRING_BUILDER);
 
-    public static final TypeAdapter<StringBuffer> STRING_BUFFER =
+    public final TypeAdapter<StringBuffer> STRING_BUFFER =
             new TypeAdapter<StringBuffer>() {
                 @Override
                 public StringBuffer read(JsonReader in) throws IOException {
@@ -713,10 +712,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory STRING_BUFFER_FACTORY =
+    public final TypeAdapterFactory STRING_BUFFER_FACTORY =
             newFactory(StringBuffer.class, STRING_BUFFER);
 
-    public static final TypeAdapter<URL> URL =
+    public final TypeAdapter<URL> URL =
             new TypeAdapter<URL>() {
                 @Override
                 public URL read(JsonReader in) throws IOException {
@@ -734,9 +733,9 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory URL_FACTORY = newFactory(URL.class, URL);
+    public final TypeAdapterFactory URL_FACTORY = newFactory(URL.class, URL);
 
-    public static final TypeAdapter<URI> URI =
+    public final TypeAdapter<URI> URI =
             new TypeAdapter<URI>() {
                 @Override
                 public URI read(JsonReader in) throws IOException {
@@ -758,9 +757,9 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory URI_FACTORY = newFactory(URI.class, URI);
+    public final TypeAdapterFactory URI_FACTORY = newFactory(URI.class, URI);
 
-    public static final TypeAdapter<InetAddress> INET_ADDRESS =
+    public final TypeAdapter<InetAddress> INET_ADDRESS =
             new TypeAdapter<InetAddress>() {
                 @Override
                 public InetAddress read(JsonReader in) throws IOException {
@@ -782,10 +781,10 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory INET_ADDRESS_FACTORY =
+    public final TypeAdapterFactory INET_ADDRESS_FACTORY =
             newTypeHierarchyFactory(InetAddress.class, INET_ADDRESS);
 
-    public static final TypeAdapter<UUID> UUID =
+    public final TypeAdapter<UUID> UUID =
             new TypeAdapter<UUID>() {
                 @Override
                 public UUID read(JsonReader in) throws IOException {
@@ -808,9 +807,9 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory UUID_FACTORY = newFactory(UUID.class, UUID);
+    public final TypeAdapterFactory UUID_FACTORY = newFactory(UUID.class, UUID);
 
-    public static final TypeAdapter<Currency> CURRENCY =
+    public final TypeAdapter<Currency> CURRENCY =
             new TypeAdapter<Currency>() {
                 @Override
                 public Currency read(JsonReader in) throws IOException {
@@ -828,7 +827,7 @@ public final class TypeAdapters {
                     out.value(value.getCurrencyCode());
                 }
             }.nullSafe();
-    public static final TypeAdapterFactory CURRENCY_FACTORY = newFactory(Currency.class, CURRENCY);
+    public final TypeAdapterFactory CURRENCY_FACTORY = newFactory(Currency.class, CURRENCY);
 
     /**
      * An abstract {@link TypeAdapter} for classes whose JSON serialization consists of a fixed set of
@@ -883,7 +882,7 @@ public final class TypeAdapters {
         }
     }
 
-    public static final TypeAdapter<Calendar> CALENDAR =
+    public final TypeAdapter<Calendar> CALENDAR =
             new IntegerFieldsTypeAdapter<Calendar>(
                     "year", "month", "dayOfMonth", "hourOfDay", "minute", "second") {
 
@@ -920,10 +919,10 @@ public final class TypeAdapters {
         return i;
     }
 
-    public static final TypeAdapterFactory CALENDAR_FACTORY =
+    public final TypeAdapterFactory CALENDAR_FACTORY =
             newFactoryForMultipleTypes(Calendar.class, GregorianCalendar.class, CALENDAR);
 
-    public static final TypeAdapter<Locale> LOCALE =
+    public final TypeAdapter<Locale> LOCALE =
             new TypeAdapter<Locale>() {
                 @Override
                 public Locale read(JsonReader in) throws IOException {
@@ -960,14 +959,14 @@ public final class TypeAdapters {
                 }
             };
 
-    public static final TypeAdapterFactory LOCALE_FACTORY = newFactory(Locale.class, LOCALE);
+    public final TypeAdapterFactory LOCALE_FACTORY = newFactory(Locale.class, LOCALE);
 
-    public static final TypeAdapter<JsonElement> JSON_ELEMENT = JsonElementTypeAdapter.ADAPTER;
+    public final TypeAdapter<JsonElement> JSON_ELEMENT = JsonElementTypeAdapter.ADAPTER;
 
-    public static final TypeAdapterFactory JSON_ELEMENT_FACTORY =
+    public final TypeAdapterFactory JSON_ELEMENT_FACTORY =
             newTypeHierarchyFactory(JsonElement.class, JSON_ELEMENT);
 
-    public static final TypeAdapterFactory ENUM_FACTORY = EnumTypeAdapter.FACTORY;
+    public final TypeAdapterFactory ENUM_FACTORY = EnumTypeAdapter.FACTORY;
 
     interface FactorySupplier {
         TypeAdapterFactory get();
